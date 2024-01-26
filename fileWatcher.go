@@ -10,6 +10,13 @@ import (
 
 func main() {
 	// Open the log file
+	if _, err := os.Stat("Logs"); os.IsNotExist(err) {
+		err := os.Mkdir("Logs", 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	file, err := os.OpenFile("Logs/logs.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
