@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -52,11 +53,24 @@ func main() {
 		}
 	}()
 
-	// Add the directory for argument to the watcher
-	path := os.Args[1]
-	err = watcher.Add(path)
-	if err != nil {
-		logger.Fatal(err)
+	// Add each directory provided as a command-line argument to the watcher
+	for _, arg := range os.Args[1:] {
+		err := filepath.Walk(arg, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				logger.Println("error:", err)
+				return nil
+			}
+			if info.IsDir() {
+				err = watcher.Add(path)
+				if err != nil {
+					logger.Println("error:", err)
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			logger.Fatal(err)
+		}
 	}
 
 	// Wait until we're done
