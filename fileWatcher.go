@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// Open the log file
-	file, err := os.OpenFile("Logs/logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("Logs/logs.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}

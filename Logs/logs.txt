@@ -1,5 +1,0 @@
-2024/01/26 11:03:14 event: CREATE        "C:\\Users\\jakub\\Desktop\\check\\Nowy folder"
-2024/01/26 11:07:20 event: CREATE        "C:\\Users\\jakub\\Desktop\\check\\Nowy folder (2)"
-2024/01/26 11:07:20 event: RENAME        "C:\\Users\\jakub\\Desktop\\check\\Nowy folder (2)"
-2024/01/26 11:07:20 event: CREATE        "C:\\Users\\jakub\\Desktop\\check\\dasdsa"
-2024/01/26 11:07:29 event: CREATE        "C:\\Users\\jakub\\Desktop\\check\\Nowy folder (2)"
