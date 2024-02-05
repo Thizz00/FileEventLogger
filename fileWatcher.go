@@ -2,84 +2,130 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+const logFilePath = "Logs/logs.log"
+
+var (
+	writeEvents = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "file_write_events_total",
+			Help: "Total number of file write events.",
+		},
+		[]string{"file"},
+	)
+	removeEvents = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "file_remove_events_total",
+			Help: "Total number of file remove events.",
+		},
+		[]string{"file"},
+	)
+	createEvents = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "file_create_events_total",
+			Help: "Total number of file create events.",
+		},
+		[]string{"file"},
+	)
 )
 
 func main() {
-	// Open the log file
-	if _, err := os.Stat("Logs"); os.IsNotExist(err) {
-		err := os.Mkdir("Logs", 0755)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	prometheus.MustRegister(writeEvents, removeEvents, createEvents)
+	createLogsDirectory()
 
-	file, err := os.OpenFile("Logs/logs.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error opening log file:", err)
 	}
-	defer file.Close() // Close the file when the main function ends
+	defer file.Close()
 
-	// Create a new logger that writes to the file
 	logger := log.New(file, "", log.LstdFlags)
-
-	// Create a new file watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal("Error creating file watcher:", err)
 	}
-	defer watcher.Close() // Close the watcher when the main function ends
+	defer watcher.Close()
 
-	// Create a channel to signal when we're done
 	done := make(chan bool)
+	go handleFileEvents(logger, watcher)
+	addDirectoriesToWatcher(logger, watcher)
+	startHTTPServer()
+	<-done
+}
 
-	// Start a goroutine to handle file events and errors
-	go func() {
-		for {
-			select {
-			case event, ok := <-watcher.Events: // Receive file events from the watcher
-				if !ok {
-					return
-				}
-				// Log the event
-				logger.Println("event:", event)
-				// If the event is a write event, log the modified file
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					logger.Println("modified file:", event.Name)
-				}
-			case err, ok := <-watcher.Errors: // Receive errors from the watcher
-				if !ok {
-					return
-				}
-				// Log the error
-				logger.Println("error:", err)
-			}
+func createLogsDirectory() {
+	if _, err := os.Stat("Logs"); os.IsNotExist(err) {
+		if err := os.Mkdir("Logs", 0755); err != nil {
+			log.Fatal("Error creating 'Logs' directory:", err)
 		}
-	}()
+	}
+}
 
-	// Add each directory provided as a command-line argument to the watcher
+func handleFileEvents(logger *log.Logger, watcher *fsnotify.Watcher) {
+	for {
+		select {
+		case event, ok := <-watcher.Events:
+			if !ok {
+				return
+			}
+			handleFileEvent(logger, event)
+		case err, ok := <-watcher.Errors:
+			if !ok {
+				return
+			}
+			logger.Println("Error watching files:", err)
+		}
+	}
+}
+
+func handleFileEvent(logger *log.Logger, event fsnotify.Event) {
+	logger.Println("Event:", event.Name)
+
+	switch {
+	case event.Op&fsnotify.Write == fsnotify.Write:
+		logger.Println("Modified file:", event.Name)
+		writeEvents.WithLabelValues(event.Name).Inc()
+	case event.Op&fsnotify.Remove == fsnotify.Remove:
+		logger.Println("Removed file:", event.Name)
+		removeEvents.WithLabelValues(event.Name).Inc()
+	case event.Op&fsnotify.Create == fsnotify.Create:
+		logger.Println("Created file:", event.Name)
+		createEvents.WithLabelValues(event.Name).Inc()
+	}
+}
+
+func addDirectoriesToWatcher(logger *log.Logger, watcher *fsnotify.Watcher) {
 	for _, arg := range os.Args[1:] {
-		err := filepath.Walk(arg, func(path string, info os.FileInfo, err error) error {
+		if err := filepath.Walk(arg, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				logger.Println("error:", err)
+				logger.Println("Error walking path:", err)
 				return nil
 			}
 			if info.IsDir() {
-				err = watcher.Add(path)
-				if err != nil {
-					logger.Println("error:", err)
+				if err := watcher.Add(path); err != nil {
+					logger.Println("Error adding directory to watcher:", err)
 				}
 			}
 			return nil
-		})
-		if err != nil {
-			logger.Fatal(err)
+		}); err != nil {
+			logger.Fatal("Error walking directory:", err)
 		}
 	}
+}
 
-	// Wait until we're done
-	<-done
+func startHTTPServer() {
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		if err := http.ListenAndServe(":9091", nil); err != nil {
+			log.Fatal("Error starting HTTP server:", err)
+		}
+	}()
 }
