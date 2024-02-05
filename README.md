@@ -2,7 +2,13 @@
 
 ## Features
 
-Create logs for
+Creating metrics in prometheus:
+
+- Total number of file create events.
+- Total number of file write events.
+- Total number of file remove events.
+
+Creating logs to a log file:
 
 - created/uploaded files/folders to the traced folders
 - deleted files/folders to the traced folders
