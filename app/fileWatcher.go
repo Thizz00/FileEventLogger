@@ -124,6 +124,7 @@ func addDirectoriesToWatcher(logger *log.Logger, watcher *fsnotify.Watcher) {
 func startHTTPServer() {
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
+
 		if err := http.ListenAndServe(":9091", nil); err != nil {
 			log.Fatal("Error starting HTTP server:", err)
 		}
