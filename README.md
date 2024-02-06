@@ -2,7 +2,7 @@
 
 <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white"/> <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"/> <img src="https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white"/>
 
-Application allows you to track traffic in the folder(s). if the file is **created**, **deleted**, **changed** this information will be written to the **log file** and **prometheus** to visualize the data on the graph.
+Application allows you to track traffic in the folder(s). if the file is **created**, **deleted**, **changed** this information will be written to the **log file** and **prometheus** to visualize the data on the Grafana graph.
 
 
 ## Run Locally on windows
