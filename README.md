@@ -36,7 +36,7 @@ Type url **https://localhost:9090** target  has been added and the metrics logs:
 
 Traced files folder/folders is visualized in the "graph" tab:
 
-![App Screenshot](/docs/dashboard.png)
+![App Screenshot](/docs/dashboard.PNG)
 
 Log into grafana under localhost:3000 using login **"admin"** and password **"admin"**, then add source with prometheus.
 
