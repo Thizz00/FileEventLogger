@@ -12,6 +12,7 @@ git clone https://github.com/Thizz00/FileEventLogger.git
 ```
 
 Install Prometheus **https://prometheus.io/download/** on Windows.
+
 Install Grafana **https://grafana.com/grafana/download/** on Windows.
 
 Copy **prometheus.exe** and **promtool.exe** to your project.
