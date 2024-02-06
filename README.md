@@ -1,6 +1,6 @@
 # FileEventLogger
 
-<img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white"/> <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"/>
+<img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white"/> <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"/> <img src="https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white"/>
 
 Application allows you to track traffic in the folder(s). if the file is **created**, **deleted**, **changed** this information will be written to the **log file** and **prometheus** to visualize the data on the graph.
 
@@ -11,7 +11,8 @@ Application allows you to track traffic in the folder(s). if the file is **creat
 git clone https://github.com/Thizz00/FileEventLogger.git
 ```
 
-Install **https://prometheus.io/download/** on Windows.
+Install Prometheus **https://prometheus.io/download/** on Windows.
+Install Grafana **https://grafana.com/grafana/download/** on Windows.
 
 Copy **prometheus.exe** and **promtool.exe** to your project.
 
@@ -34,7 +35,19 @@ Type url **https://localhost:9090** target  has been added and the metrics logs:
 
 Traced files folder/folders is visualized in the "graph" tab:
 
-![App Screenshot](/docs/dashboard.PNG)
+![App Screenshot](/docs/dashboard.png)
+
+Log into grafana under localhost:3000 using login **"admin"** and password **"admin"**, then add source with prometheus.
+
+Prometheus server URL **https://localhost:9090**.
+
+Create your dashboard and add these **3 metrics**:
+
+- file_create_events_total
+- file_remove_events_total
+- file_write_events_total
+
+![App Screenshot](/docs/grafana.PNG)
 
 ## Features
 
