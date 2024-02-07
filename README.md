@@ -52,6 +52,8 @@ Create your dashboard and add these **3 metrics**:
 
 ## Features
 
+Added possibility of combining prometehus metrics with graphana.
+
 Creating metrics in prometheus:
 
 - Total number of file create events.
